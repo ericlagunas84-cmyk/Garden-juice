@@ -105,6 +105,35 @@
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .category-pill.is-active { background: #154212 !important; color: #fff !important; }
   .salad-option.selected { background: #154212 !important; color: #ffffff !important; border-color: #154212 !important; }
+  #chilaquiles-modal.hidden, #chilaquiles-modal-overlay.hidden { display: none; }
+  /* Robust flex layout for the modal — doesn't depend on Tailwind's flex/overflow
+     utility classes loading in time, so the body always scrolls correctly and
+     header/footer never get squeezed or clipped. */
+  #chilaquiles-modal {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0; right: 0; bottom: 0; top: auto;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+  }
+  #chilaquiles-modal-header { flex: 0 0 auto; }
+  #chilaquiles-modal-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #chilaquiles-modal-footer { flex: 0 0 auto; }
+  @media (min-width: 768px) {
+    #chilaquiles-modal {
+      left: 50%; right: auto; bottom: auto; top: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%; max-width: 32rem;
+      max-height: 85vh;
+    }
+  }
+  .extra-option.selected, .radio-option.selected { background: #f2f4f0; border-color: #154212 !important; }
+  .extra-option .check-box, .radio-option .radio-circle { border: 2px solid #72796e; }
+  .extra-option.selected .check-box { background: #154212; border-color: #154212; }
+  .radio-option.selected .radio-circle { border-color: #154212; }
+  .radio-option.selected .radio-circle::after { content: ''; display: block; width: 10px; height: 10px; border-radius: 9999px; background: #154212; margin: 2px; }
 </style>
 </head>
 <body class="bg-background text-on-background antialiased selection:bg-primary-container selection:text-on-primary-container">
@@ -187,7 +216,7 @@ Ordenar por WhatsApp
 <section class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg">
 <div class="grid grid-cols-2 md:grid-cols-3 gap-gutter [column-fill:_balance]">
 <figure class="relative rounded-xl overflow-hidden shadow-soft-green group row-span-2">
-<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 min-h-[420px]" alt="Chilaquiles recién servidos con queso fresco y crema" src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80"/>
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 min-h-[420px]" alt="Chilaquiles recién servidos con queso fresco y crema" src="chilaquiles.webp"/>
 <figcaption class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity">
 <p class="font-label-bold text-label-bold text-white">Chilaquiles recién hechos</p>
 </figcaption>
@@ -333,6 +362,65 @@ Realizar Pedido por WhatsApp
 <button onclick="clearCart()" class="w-full text-center font-body-md text-body-md text-on-surface-variant hover:text-error transition-colors">Vaciar carrito</button>
 </div>
 </aside>
+
+<!-- Chilaquiles Customize Modal -->
+<div id="chilaquiles-modal-overlay" class="fixed inset-0 bg-black/40 z-[80] hidden" onclick="closeChilaquilesModal()"></div>
+<div id="chilaquiles-modal" class="fixed inset-x-0 bottom-0 md:inset-0 md:m-auto md:max-w-lg md:h-fit md:max-h-[85vh] w-full max-h-[90vh] bg-surface-container-lowest z-[90] rounded-t-2xl md:rounded-2xl shadow-2xl hidden flex flex-col">
+<div id="chilaquiles-modal-header" class="flex items-center justify-between px-6 py-5 border-b border-surface-dim shrink-0">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Chilaquiles</h3>
+<button aria-label="Cerrar" onclick="closeChilaquilesModal()" class="text-on-surface-variant hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined text-[28px]">close</span>
+</button>
+</div>
+<div id="chilaquiles-modal-body" class="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+
+<div>
+<h4 class="font-body-lg font-bold text-on-surface">Seleccionar Ingredientes</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Da un toque a tu platillo</p>
+<p class="font-label-bold text-label-bold text-tertiary-container mt-1">Selecciona hasta 12</p>
+<div id="chilaquiles-extras" class="mt-3 space-y-2"></div>
+</div>
+
+<div>
+<div class="flex items-baseline gap-2">
+<h4 class="font-body-lg font-bold text-on-surface">* Salsa Para Tus Chilaquiles</h4>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Elegir 1</p>
+<p class="font-label-bold text-label-bold text-error mt-0.5">Obligatorio</p>
+<div id="chilaquiles-salsa" class="mt-3 space-y-2"></div>
+</div>
+
+<div>
+<h4 class="font-body-lg font-bold text-on-surface">* Salsa Aparte.</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Selecciona hasta 1</p>
+<div id="chilaquiles-salsa-aparte" class="mt-3 space-y-2"></div>
+</div>
+
+<div>
+<h4 class="font-body-lg font-bold text-on-surface">* ¿Deseas Cubiertos?</h4>
+<p class="font-body-md text-body-md text-on-surface-variant">Elegir 1</p>
+<p class="font-label-bold text-label-bold text-error mt-0.5">Obligatorio</p>
+<div id="chilaquiles-cubiertos" class="mt-3 space-y-2"></div>
+</div>
+
+<div>
+<h4 class="font-body-lg font-bold text-on-surface mb-1">Instrucciones Especiales</h4>
+<textarea id="chilaquiles-notes" rows="3" placeholder="Ej. sin cilantro, poco picante..." class="w-full rounded-lg border-2 border-tertiary-fixed bg-surface px-4 py-3 font-body-md text-body-md text-on-surface focus:border-primary focus:ring-0 transition-colors"></textarea>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Es posible que se te cobren los artículos adicionales.</p>
+</div>
+
+<p id="chilaquiles-validation-msg" class="hidden font-label-bold text-label-bold text-error"></p>
+</div>
+<div id="chilaquiles-modal-footer" class="border-t border-surface-dim px-6 py-5 space-y-3 bg-surface-container-low shrink-0">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface">Total</span>
+<span id="chilaquiles-total" class="font-headline-sm text-headline-sm text-primary">$155.00</span>
+</div>
+<button id="chilaquiles-add-btn" class="w-full inline-flex items-center justify-center gap-2 bg-primary text-on-primary rounded-full px-8 py-4 font-label-bold text-label-bold hover:bg-primary-container transition-colors duration-200 shadow-soft-green">
+<span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>Agregar Al Carrito
+</button>
+</div>
+</div>
 
 <!-- Floating WhatsApp Button -->
 <a aria-label="Contactar por WhatsApp" class="fixed bottom-6 right-6 z-50 bg-[#25D366] text-white p-4 rounded-full shadow-lg hover:scale-110 transition-all duration-300 flex items-center justify-center group" href="https://wa.me/526567715523" target="_blank" rel="noopener noreferrer">
@@ -517,6 +605,51 @@ Realizar Pedido por WhatsApp
 
     const addSaladBtn = e.target.closest('#add-custom-salad-btn');
     if (addSaladBtn) { addCustomSalad(); }
+
+    // Chilaquiles customize modal
+    const customizeBtn = e.target.closest('.customize-btn');
+    if (customizeBtn && customizeBtn.dataset.item === 'chilaquiles') { openChilaquilesModal(); }
+
+    const extraOpt = e.target.closest('.extra-option');
+    if (extraOpt) {
+      extraOpt.classList.toggle('selected');
+      const idx = chilaquilesSelection.extras.findIndex(x => x.name === extraOpt.dataset.value);
+      if (idx === -1) {
+        if (chilaquilesSelection.extras.length >= 12) {
+          extraOpt.classList.remove('selected');
+        } else {
+          chilaquilesSelection.extras.push({ name: extraOpt.dataset.value, price: parseFloat(extraOpt.dataset.price) });
+        }
+      } else {
+        chilaquilesSelection.extras.splice(idx, 1);
+      }
+      updateChilaquilesTotal();
+    }
+
+    const radioOpt = e.target.closest('.radio-option');
+    if (radioOpt) {
+      const group = radioOpt.dataset.group;
+      document.querySelectorAll('.radio-option[data-group="' + group + '"]').forEach(b => b.classList.remove('selected'));
+      radioOpt.classList.add('selected');
+      chilaquilesSelection[group] = radioOpt.dataset.value;
+      const msgEl = document.getElementById('chilaquiles-validation-msg');
+      if (msgEl) { msgEl.classList.add('hidden'); }
+    }
+
+    const salsaAparteOpt = e.target.closest('.salsa-aparte-option');
+    if (salsaAparteOpt) {
+      const wasSelected = salsaAparteOpt.classList.contains('selected');
+      document.querySelectorAll('.salsa-aparte-option').forEach(b => b.classList.remove('selected'));
+      if (!wasSelected) {
+        salsaAparteOpt.classList.add('selected');
+        chilaquilesSelection.salsaAparte = true;
+      } else {
+        chilaquilesSelection.salsaAparte = false;
+      }
+    }
+
+    const chilaquilesAddBtn = e.target.closest('#chilaquiles-add-btn');
+    if (chilaquilesAddBtn) { addChilaquilesToCart(); }
   });
 
   // ---- Crea Tu Ensalada builder ----
@@ -544,14 +677,131 @@ Realizar Pedido por WhatsApp
       }
       return;
     }
-    let name = 'Crea Tu Ensalada (Base: ' + saladSelection.base + ', Proteína: ' + saladSelection.protein;
-    if (saladSelection.ingredients.length) { name += ', Ingredientes: ' + saladSelection.ingredients.join(', '); }
-    if (saladSelection.dressings.length) { name += ', Aderezo: ' + saladSelection.dressings.join(', '); }
-    name += ')';
-    addToCart(name, 259.00);
+    let saladName = 'Crea Tu Ensalada (Base: ' + saladSelection.base + ', Proteína: ' + saladSelection.protein;
+    if (saladSelection.ingredients.length) { saladName += ', Ingredientes: ' + saladSelection.ingredients.join(', '); }
+    if (saladSelection.dressings.length) { saladName += ', Aderezo: ' + saladSelection.dressings.join(', '); }
+    saladName += ')';
+    addToCart(saladName, 259.00);
     if (msgEl) { msgEl.classList.add('hidden'); }
     const summaryEl = document.getElementById('salad-summary');
     if (summaryEl) { summaryEl.textContent = '¡Agregada al carrito! Puedes armar otra ensalada distinta si quieres.'; }
+  }
+
+  // ---- Chilaquiles customize modal ----
+  const CHILAQUILES_BASE_PRICE = 155.00;
+  const CHILAQUILES_EXTRAS = [
+    { name: 'Pechuga', price: 55.00 },
+    { name: 'Huevo (2 piezas)', price: 45.00, popular: true },
+    { name: 'Bistec', price: 48.00 },
+    { name: 'Tocino', price: 42.00 },
+    { name: 'Aguacate', price: 45.00 },
+    { name: 'Papa Hash 1 Pieza', price: 32.00 },
+    { name: 'Cebolla Encurtida Extra 2oz', price: 18.00 },
+    { name: 'Queso Extra 2oz', price: 25.00 },
+    { name: 'Panela', price: 45.00 },
+    { name: 'Crema Extra 2oz', price: 18.00 },
+    { name: 'Jamón (2 rebanadas)', price: 38.00 }
+  ];
+  let chilaquilesSelection = { extras: [], salsa: null, salsaAparte: false, cubiertos: null };
+
+  function resetChilaquilesModal() {
+    chilaquilesSelection = { extras: [], salsa: null, salsaAparte: false, cubiertos: null };
+    const extrasWrap = document.getElementById('chilaquiles-extras');
+    const salsaWrap = document.getElementById('chilaquiles-salsa');
+    const salsaAparteWrap = document.getElementById('chilaquiles-salsa-aparte');
+    const cubiertosWrap = document.getElementById('chilaquiles-cubiertos');
+    const notesEl = document.getElementById('chilaquiles-notes');
+    if (notesEl) { notesEl.value = ''; }
+    const msgEl = document.getElementById('chilaquiles-validation-msg');
+    if (msgEl) { msgEl.classList.add('hidden'); }
+
+    if (extrasWrap) {
+      extrasWrap.innerHTML = '';
+      CHILAQUILES_EXTRAS.forEach(function (extra) {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'extra-option w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-outline-variant text-left';
+        row.dataset.value = extra.name;
+        row.dataset.price = extra.price;
+        const popularBadge = extra.popular ? '<span class="inline-block bg-secondary-container text-on-secondary-container font-label-bold text-[10px] px-2 py-0.5 rounded-full ml-2">Popular</span>' : '';
+        row.innerHTML = '<span class="flex items-center gap-3"><span class="check-box w-5 h-5 rounded shrink-0"></span><span class="font-body-md text-on-surface">' + extra.name + popularBadge + '</span></span><span class="font-label-bold text-label-bold text-secondary whitespace-nowrap">+$' + extra.price.toFixed(2) + '</span>';
+        extrasWrap.appendChild(row);
+      });
+    }
+    if (salsaWrap) {
+      salsaWrap.innerHTML = '';
+      ['Roja', 'Verde', 'Chipotle Cremosa'].forEach(function (val) {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'radio-option w-full flex items-center gap-3 px-4 py-3 rounded-lg border border-outline-variant text-left';
+        row.dataset.group = 'salsa';
+        row.dataset.value = val;
+        row.innerHTML = '<span class="radio-circle w-5 h-5 rounded-full shrink-0"></span><span class="font-body-md text-on-surface">' + val + '</span>';
+        salsaWrap.appendChild(row);
+      });
+    }
+    if (salsaAparteWrap) {
+      salsaAparteWrap.innerHTML = '';
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'salsa-aparte-option extra-option w-full flex items-center gap-3 px-4 py-3 rounded-lg border border-outline-variant text-left';
+      row.innerHTML = '<span class="check-box w-5 h-5 rounded shrink-0"></span><span class="font-body-md text-on-surface">Salsa Aparte.</span>';
+      salsaAparteWrap.appendChild(row);
+    }
+    if (cubiertosWrap) {
+      cubiertosWrap.innerHTML = '';
+      ['Sí', 'No'].forEach(function (val) {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'radio-option w-full flex items-center gap-3 px-4 py-3 rounded-lg border border-outline-variant text-left';
+        row.dataset.group = 'cubiertos';
+        row.dataset.value = val;
+        row.innerHTML = '<span class="radio-circle w-5 h-5 rounded-full shrink-0"></span><span class="font-body-md text-on-surface">' + val + '</span>';
+        cubiertosWrap.appendChild(row);
+      });
+    }
+    updateChilaquilesTotal();
+  }
+
+  function updateChilaquilesTotal() {
+    const totalEl = document.getElementById('chilaquiles-total');
+    if (!totalEl) return;
+    const extrasTotal = chilaquilesSelection.extras.reduce((s, x) => s + x.price, 0);
+    totalEl.textContent = '$' + (CHILAQUILES_BASE_PRICE + extrasTotal).toFixed(2);
+  }
+
+  function openChilaquilesModal() {
+    resetChilaquilesModal();
+    document.getElementById('chilaquiles-modal').classList.remove('hidden');
+    document.getElementById('chilaquiles-modal-overlay').classList.remove('hidden');
+  }
+  function closeChilaquilesModal() {
+    document.getElementById('chilaquiles-modal').classList.add('hidden');
+    document.getElementById('chilaquiles-modal-overlay').classList.add('hidden');
+  }
+
+  function addChilaquilesToCart() {
+    const msgEl = document.getElementById('chilaquiles-validation-msg');
+    if (!chilaquilesSelection.salsa || !chilaquilesSelection.cubiertos) {
+      if (msgEl) {
+        msgEl.textContent = 'Selecciona la salsa y si deseas cubiertos antes de agregar.';
+        msgEl.classList.remove('hidden');
+      }
+      return;
+    }
+    const extrasTotal = chilaquilesSelection.extras.reduce((s, x) => s + x.price, 0);
+    const price = CHILAQUILES_BASE_PRICE + extrasTotal;
+    let name = 'Chilaquiles (Salsa: ' + chilaquilesSelection.salsa;
+    if (chilaquilesSelection.salsaAparte) { name += ', Salsa Aparte'; }
+    if (chilaquilesSelection.extras.length) {
+      name += ', Extras: ' + chilaquilesSelection.extras.map(x => x.name).join(', ');
+    }
+    name += ', Cubiertos: ' + chilaquilesSelection.cubiertos;
+    const notesEl = document.getElementById('chilaquiles-notes');
+    if (notesEl && notesEl.value.trim()) { name += ', Notas: ' + notesEl.value.trim(); }
+    name += ')';
+    addToCart(name, price);
+    closeChilaquilesModal();
   }
 
   document.addEventListener('DOMContentLoaded', renderCartPanel);
