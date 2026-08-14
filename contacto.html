@@ -382,12 +382,6 @@ Realizar Pedido por WhatsApp
 </div>
 
 <div>
-<h4 class="font-body-lg font-bold text-on-surface">* Salsa Aparte.</h4>
-<p class="font-body-md text-body-md text-on-surface-variant">Selecciona hasta 1</p>
-<div id="chilaquiles-salsa-aparte" class="mt-3 space-y-2"></div>
-</div>
-
-<div>
 <h4 class="font-body-lg font-bold text-on-surface">* ¿Deseas Cubiertos?</h4>
 <p class="font-body-md text-body-md text-on-surface-variant">Elegir 1</p>
 <p class="font-label-bold text-label-bold text-error mt-0.5">Obligatorio</p>
@@ -627,18 +621,6 @@ Realizar Pedido por WhatsApp
       if (msgEl) { msgEl.classList.add('hidden'); }
     }
 
-    const salsaAparteOpt = e.target.closest('.salsa-aparte-option');
-    if (salsaAparteOpt) {
-      const wasSelected = salsaAparteOpt.classList.contains('selected');
-      document.querySelectorAll('.salsa-aparte-option').forEach(b => b.classList.remove('selected'));
-      if (!wasSelected) {
-        salsaAparteOpt.classList.add('selected');
-        chilaquilesSelection.salsaAparte = true;
-      } else {
-        chilaquilesSelection.salsaAparte = false;
-      }
-    }
-
     const chilaquilesAddBtn = e.target.closest('#chilaquiles-add-btn');
     if (chilaquilesAddBtn) { addChilaquilesToCart(); }
   });
@@ -693,13 +675,12 @@ Realizar Pedido por WhatsApp
     { name: 'Crema Extra 2oz', price: 18.00 },
     { name: 'Jamón (2 rebanadas)', price: 38.00 }
   ];
-  let chilaquilesSelection = { extras: [], salsa: null, salsaAparte: false, cubiertos: null };
+  let chilaquilesSelection = { extras: [], salsa: null, cubiertos: null };
 
   function resetChilaquilesModal() {
-    chilaquilesSelection = { extras: [], salsa: null, salsaAparte: false, cubiertos: null };
+    chilaquilesSelection = { extras: [], salsa: null, cubiertos: null };
     const extrasWrap = document.getElementById('chilaquiles-extras');
     const salsaWrap = document.getElementById('chilaquiles-salsa');
-    const salsaAparteWrap = document.getElementById('chilaquiles-salsa-aparte');
     const cubiertosWrap = document.getElementById('chilaquiles-cubiertos');
     const notesEl = document.getElementById('chilaquiles-notes');
     if (notesEl) { notesEl.value = ''; }
@@ -730,14 +711,6 @@ Realizar Pedido por WhatsApp
         row.innerHTML = '<span class="radio-circle w-5 h-5 rounded-full shrink-0"></span><span class="font-body-md text-on-surface">' + val + '</span>';
         salsaWrap.appendChild(row);
       });
-    }
-    if (salsaAparteWrap) {
-      salsaAparteWrap.innerHTML = '';
-      const row = document.createElement('button');
-      row.type = 'button';
-      row.className = 'salsa-aparte-option extra-option w-full flex items-center gap-3 px-4 py-3 rounded-lg border border-outline-variant text-left';
-      row.innerHTML = '<span class="check-box w-5 h-5 rounded shrink-0"></span><span class="font-body-md text-on-surface">Salsa Aparte.</span>';
-      salsaAparteWrap.appendChild(row);
     }
     if (cubiertosWrap) {
       cubiertosWrap.innerHTML = '';
@@ -783,7 +756,6 @@ Realizar Pedido por WhatsApp
     const extrasTotal = chilaquilesSelection.extras.reduce((s, x) => s + x.price, 0);
     const price = CHILAQUILES_BASE_PRICE + extrasTotal;
     let name = 'Chilaquiles (Salsa: ' + chilaquilesSelection.salsa;
-    if (chilaquilesSelection.salsaAparte) { name += ', Salsa Aparte'; }
     if (chilaquilesSelection.extras.length) {
       name += ', Extras: ' + chilaquilesSelection.extras.map(x => x.name).join(', ');
     }
